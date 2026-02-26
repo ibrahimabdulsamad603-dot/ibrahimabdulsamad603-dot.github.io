@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Deposit Approvals</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f0f17;
+      color: #e0e0ff;
+      margin: 0;
+      padding: 16px;
+      line-height: 1.5;
+    }
+    h1 {
+      color: #a5b4fc;
+      text-align: center;
+      margin: 20px 0 32px;
+      font-size: 1.8rem;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .message {
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+    }
+    .success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      border: 1px solid #22c55e44;
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid #ef444444;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1e1e38;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #2d2d4a;
+    }
+    th {
+      background: #2a2a48;
+      color: #c7d2fe;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      letter-spacing: 0.5px;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .amount {
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+    .status-pending {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+    .status-approved {
+      color: #4ade80;
+      font-weight: 600;
+    }
+    .btn-approve {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-approve:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+    .btn-approve:disabled {
+      background: #4b5563;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    .refresh-btn {
+      display: block;
+      margin: 24px auto;
+      padding: 10px 24px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .refresh-btn:hover {
+      background: #4f46e5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Deposit Approval Panel</h1>
+
+  <div id="message" class="message"></div>
+
+  <div id="loading" style="text-align:center; padding:40px 0; color:#94a3b8;">
+    Loading pending requests...
+  </div>
+
+  <div id="content"></div>
+
+  <button class="refresh-btn" onclick="loadPendingDeposits()">Refresh List</button>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// Replace this with YOUR actual deployed web app URL
+// ────────────────────────────────────────────────
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEoR9PNkrT6DF40JT9B7kcyuVlIGM9PIAXWGD4EY1f9oZBZmS1pEwhdwNo-vbtVORs/exec";
+
+function showMessage(text, type = "success") {
+  const msg = document.getElementById("message");
+  msg.textContent = text;
+  msg.className = "message " + type;
+  msg.style.display = "block";
+  setTimeout(() => { msg.style.display = "none"; }, 5000);
+}
+
+function approveDeposit(reqId, email, amount, button) {
+  if (!confirm(`Approve ₦${amount.toLocaleString()} for ${email}?`)) return;
+
+  button.disabled = true;
+  button.textContent = "Approving...";
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showMessage(`Successfully approved ₦${amount.toLocaleString()} for ${email}`);
+      // Optional: remove row or change status visually
+      const row = button.closest("tr");
+      row.querySelector(".status").textContent = "approved";
+      row.querySelector(".status").className = "status status-approved";
+      button.remove();
+    })
+    .withFailureHandler(err => {
+      showMessage("Approval failed: " + (err.message || "Unknown error"), "error");
+      button.disabled = false;
+      button.textContent = "Approve";
+    })
+    .approveRequest(reqId, email, amount);
+}
+
+function loadPendingDeposits() {
+  const content = document.getElementById("content");
+  const loading = document.getElementById("loading");
+  loading.style.display = "block";
+  content.innerHTML = "";
+
+  google.script.run
+    .withSuccessHandler(html => {
+      loading.style.display = "none";
+      content.innerHTML = html;
+    })
+    .withFailureHandler(err => {
+      loading.style.display = "none";
+      content.innerHTML = `<div class="empty">Error loading data: ${err.message || "Connection failed"}</div>`;
+    })
+    .getPendingDepositsHtml();   // ← you need to add this function in Apps Script
+}
+
+// Important: this function must be added to your Code.gs !
+// (see note below)
+
+window.onload = loadPendingDeposits;
+</script>
+
+</body>

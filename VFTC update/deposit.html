@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirm Transfer</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --card: #111118;
+      --purple: #a855f7;
+      --green: #22c55e;
+      --yellow: #fbbf24;
+      --gray: #9ca3af;
+      --text: #e5e7eb;
+      --border: #1f1f2e;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+    .close {
+      font-size: 2rem;
+      color: white;
+      cursor: pointer;
+    }
+    .email {
+      font-size: 0.95rem;
+      color: var(--gray);
+      margin: 8px 0 24px;
+      text-align: center;
+    }
+    .amount {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: white;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .transfer-info {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .transfer-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+    .detail-label {
+      color: var(--gray);
+    }
+    .detail-value {
+      color: white;
+      font-weight: 500;
+      text-align: right;
+      word-break: break-all;
+    }
+    .copy-icon {
+      color: var(--green);
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .warning {
+      font-size: 0.9rem;
+      color: var(--gray);
+      text-align: center;
+      margin: 16px 0 24px;
+    }
+    .timer {
+      font-size: 1.1rem;
+      color: var(--yellow);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .confirm-btn {
+      background: var(--yellow);
+      color: #1e1b4b;
+      border: none;
+      padding: 18px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 999px;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+    }
+    .info-box {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: #fca5a5;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div onclick="window.location.href='payment.html'">
+      <i data-lucide="arrow-left" width="20"></i>
+    </div>
+    <div class="close" onclick="window.location.href='dashboard.html'">×</div>
+  </div>
+  <div class="amount" id="amountDisplay"></div>
+
+  <div class="transfer-info">
+    <div class="transfer-title">Transfer to VFTC Company using the account details below</div>
+
+    <div class="detail-row">
+      <span class="detail-label">Amount</span>
+      <span class="detail-value" id="amountDetail">₦ <i data-lucide="copy" class="copy-icon" onclick="copyToClipboard('₦6,500')"></i></span>
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Account number</span>
+      <span class="detail-value">7076464276 <i data-lucide="copy" class="copy-icon" onclick="copyToClipboard('7076464276')"></i></span>
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Account Name</span>
+      <span class="detail-value">ABDULSAMAD IBRAHIM <br> ADEKOLA</br></span>
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Bank Name</span>
+      <span class="detail-value">OPAY </span>
+    </div>
+  </div>
+
+  <p class="warning">Send exactly the amount selected to this account only.</p>
+
+  <div class="timer">Expires in <span id="timer">29:53</span></div>
+
+  <button class="confirm-btn" onclick="showLoadingAndRedirect()">Confirm Transfer</button><script>
+  function showLoadingAndRedirect() {
+    // Show loading overlay
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    // Get current plan details from URL (to pass to confirm page)
+    const urlParams = new URLSearchParams(window.location.search);
+    const plan = urlParams.get('plan') || 'Weekly Plan';
+    const amount = urlParams.get('amount') || '6500';
+    const days = urlParams.get('days') || '7';
+    
+    // Wait 3 seconds (you can change to 2500 or 4000 etc.)
+    setTimeout(() => {
+      // Redirect to confirm transfer with same parameters
+      window.location.href = `deposit.html?plan=${encodeURIComponent(plan)}&amount=${amount}&days=${days}`;
+    }, 3000); // 3000ms = 3 seconds
+  }
+</script>
+
+  <div class="info-box">
+    Do not close or refresh this page until your payment is confirmed.
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Read URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const amount = urlParams.get('amount') || '6500';
+    const formattedAmount = `₦${Number(amount).toLocaleString()}`;
+
+    document.getElementById('amountDisplay').textContent = formattedAmount;
+    document.getElementById('amountDetail').innerHTML = `${formattedAmount} <i data-lucide="copy" class="copy-icon" onclick="copyToClipboard('${formattedAmount}')"></i>`;
+
+    // Countdown timer (starts from 29:53)
+    let timeLeft = 29 * 60 + 53;
+    function updateTimer() {
+      if (timeLeft <= 0) {
+        document.getElementById('timer').textContent = 'Expired';
+        return;
+      }
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      timeLeft--;
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    // Copy to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text.replace('₦', '')).then(() => {
+        alert('Copied: ' + text);
+      });
+    }
+
+    // Confirm button action (placeholder)
+    function confirmTransfer() {
+      alert('Payment confirmation sent. Your plan will activate after verification.');
+      // You can redirect or show success page here
+    }
+  </script>
+  <!-- Loading Overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; inset:0; background:rgba(10,10,15,0.95); z-index:10000; justify-content:center; align-items:center; flex-direction:column; color:white;">
+  <div class="spinner" style="width:60px; height:60px; border:6px solid #374151; border-top:6px solid var(--green); border-radius:50%; animation:spin 1s linear infinite;"></div>
+  <p style="margin-top:20px; font-size:1.1rem; font-weight:500;">Processing Payment...</p>
+  <p style="margin-top:8px; font-size:0.9rem; color:#9ca3af;">Please wait a moment</p>
+</div>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+</body>
